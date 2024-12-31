@@ -1,16 +1,23 @@
 const contactModel = require("../models/contact.model");
 const { validationResult } = require("express-validator");
 
-module.exports.renderContactPage = (req, res) => {
-  res.render("contact");
+module.exports.getAllContacts = async (req, res) => {
+  try {
+    const contacts = await contactModel.find({});
+    res.status(200).json(contacts);
+  } catch (err) {
+    console.error("Error fetching contacts:", err);
+    res.status(500).json({ message: "Error fetching contacts" });
+  }
 };
 
-module.exports.showEntries = async (req, res) => {
+module.exports.getContact = async (req, res) => {
   try {
-    const allEntries = await contactModel.find({});
-    res.render("entries", { allEntries });
+    const contact = await contactModel.findById(req.params.id);
+    res.status(200).json(contact);
   } catch (err) {
-    console.log(err);
+    console.log("Error fetching contact", err);
+    res.status(500).json({ message: "Error fetching contact" });
   }
 };
 
@@ -36,33 +43,29 @@ module.exports.createContact = async (req, res) => {
       company,
     });
 
-    res.redirect("/contacts/entries");
+    res.status(201).json("Created successfully");
   } catch (err) {
     console.log(err);
-    res.redirect("/contacts");
+    res.status(err.status).json(err.message);
   }
-};
-
-module.exports.renderEditPage = async (req, res) => {
-  const entry = await contactModel.findById(req.params.id);
-  res.render("edit", { entry });
 };
 
 module.exports.editDetails = async (req, res) => {
   try {
     const { firstname, lastname, email, phone, company, jobtitle } = req.body;
-    const updatedDetails = await contactModel.findByIdAndUpdate(req.params.id, {
+    await contactModel.findByIdAndUpdate(req.params.id, {
       firstname,
       lastname,
       email,
+      phone,
       company,
       jobtitle,
     });
 
-    res.redirect("/contacts/entries");
+    res.status(200).json({ message: "Entry updated successfully!" });
   } catch (err) {
     console.log(err);
-    res.redirect(`/contacts/${req.params.id}`);
+    res.status(500).json({ message: "Error updating entry" });
   }
 };
 

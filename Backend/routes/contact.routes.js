@@ -3,9 +3,9 @@ const router = express.Router();
 const contactController = require("../controller/contact.controller");
 const { body } = require("express-validator");
 
-router.get("/", contactController.renderContactPage);
+router.get("/", contactController.getAllContacts);
 
-router.get("/entries", contactController.showEntries);
+router.get("/:id", contactController.getContact);
 
 router.post(
   "/",
@@ -30,8 +30,6 @@ router.post(
   ],
   contactController.createContact
 );
-
-router.get("/:id", contactController.renderEditPage);
 
 router.put("/:id", contactController.editDetails);
 
